@@ -1,0 +1,120 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref} % For hyperlinks
+\usepackage{longtable} % For long tables spanning pages
+\usepackage{newunicodechar}
+% \newunicodechar{}{\textcurrency} % Or define your own macro
+\usepackage[margin = 20mm]{geometry}
+\usepackage{array}
+
+\title{SOC 2025 - Algorithmic Trading in Python\\Week 0 Report}
+\author{Revanth Manepalli}
+\date{May 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Track the Stock History of Infosys and Report the Following for Last 5 Years}
+
+\subsection{Dates and Ratios of Stock Splits}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Date} & \textbf{Split} & \textbf{Multiple} & \textbf{Cumulative Multiple} \\
+        \hline
+        2018-09-12 & 2:1 & x2 & x64 \\
+        2015-06-25 & 2:1 & x2 & x32 \\
+        2014-12-08 & 2:1 & x2 & x16 \\
+        2006-07-18 & 2:1 & x2 & x8 \\
+        2004-07-07 & 2:1 & x2 & x4 \\
+        2000-02-15 & 2:1 & x2 & x2 \\
+        \hline
+    \end{tabular}
+    \label{tab:infosys-splits}
+\end{table}
+\noindent\textbf{Source:} \href{https://companiesmarketcap.com/infosys/stock-splits/}{https://companiesmarketcap.com/infosys/stock-splits/}
+
+\subsection{Dividend Payouts (Amount, Ex-Date, Record Date)}
+\begin{longtable}{|c|c|c|c|}
+
+\hline
+\textbf{Ex-Date} & \textbf{Dividend Type} & \textbf{Amount(in Rs.)} & \textbf{Record Date} \\
+\hline
+\endhead
+May 30, 2025 & Final & 22.00 & May 30, 2025 \\
+October 29, 2024 & Interim & 21.00 & October 29, 2024 \\
+May 31, 2024 & Final & 20.00 & May 31, 2024 \\
+May 31, 2024 & Special & 8.00 & May 31, 2024 \\
+October 25, 2023 & Interim & 18.00 & October 25, 2023 \\
+June 2, 2023 & Final & 17.50 & June 2, 2023 \\
+October 27, 2022 & Interim & 16.50 & October 28, 2022 \\
+May 31, 2022 & Final & 16.00 & June 1, 2022 \\
+October 26, 2021 & Interim & 15.00 & October 27, 2021 \\
+May 31, 2021 & Final & 15.00 & June 1, 2021 \\
+\hline
+\caption{Infosys Dividend History (2019–2024)}
+\label{tab:dividends}
+\end{longtable}
+\noindent\textbf{Source:} \href{https://www.nseindia.com/national-stock-exchange/about-nse-company}{https://www.nseindia.com/national-stock-exchange/about-nse-company}
+
+\subsection{Major Events (Earnings Surprises, CEO Change, Mergers, etc.)}
+\subsection*{a. CEO Compensation Increase (2024)}
+\begin{itemize}
+    \item CEO Salil Parekh's compensation rose 17.3\% to 662.4 million (\$7.9 million) in FY 2024, making him one of the highest-paid Indian IT chiefs.
+\end{itemize}
+
+\subsection*{b. Earnings Surprises}
+\begin{itemize}
+    \item \textbf{Q3 FY2025:} Infosys reported a 7.6\% increase in revenue, surpassing analysts' expectations. Net profit rose 11.4\%, leading to a positive market response.
+    \item \textbf{Q4 FY2024:} Despite beating earnings per share estimates, Infosys's revenue fell short of expectations, resulting in an 8.1\% drop in its American Depositary Receipts (ADRs).
+\end{itemize}
+
+\subsection*{c. Acquisitions}
+\begin{itemize}
+    \item Infosys announced plans to acquire two firms to enhance its capabilities in engineering research and development services. 
+\end{itemize}
+
+\subsection{Impact of These Events on Stock Price (Before vs. After)}
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Event} & \textbf{Stock Price Impact} \\
+\hline
+Q3 FY2025 Earnings Beat & +0.9\% (premarket) \\
+Q4 FY2024 Revenue Miss & -8.1\% (ADRs) \\
+\hline
+\end{tabular}
+\caption{Stock Price Impact of Major Events}
+\end{table}
+
+\section{Stock Analysis of a Chosen Stock Using Screener (or Any Tool)}
+\begin{itemize}
+    \item \textbf{Stock Chosen: }Tata Motors
+    \item OHLC date: \date{23/05/2025}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Metric} & \textbf{Tata Motors} & \textbf{NIFTY 50} \\
+        \hline
+        Open Price & Rs.\ 718.75 & 24,639.50 \\
+        High Price & Rs.\ 721.80 & 24,909.05 \\
+        Low Price & Rs.\ 715.00 & 24,614.05 \\
+        Close Price & Rs.\ 718.25 & 24,853.15 \\
+        52-Week High & Rs.\ 1161.85 (30/07/2024) & 26,216.05 (26/09/2024) \\
+        52-Week Low & Rs.\ 579.75 (07/04/2025) & 21,884.50 (04/06/2024) \\
+        Market Cap & Rs.\ 2,69,180 Cr & Rs.\ 1,97,42,625 Cr \\
+        P/E Ratio & 11.4 & 22.4 \\
+        6-Month Return & -8.38\% & 7.80\% \\
+        1-Year Return & -25.20\% & 8.26\% \\
+        3-Year Return & 18.70\% & 54.13\% \\
+        \hline
+    \end{tabular}
+    \caption{Tata Motors Stock Analysis}
+\end{table}
+    \item \textbf{Source: } \href{https://www.nseindia.com/national-stock-exchange/about-nse-company}{https://www.nseindia.com/national-stock-exchange/about-nse-company}
+\end{itemize}
+\end{document}

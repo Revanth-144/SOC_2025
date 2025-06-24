@@ -1,0 +1,295 @@
+\documentclass{article}
+\usepackage[a4paper]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\title{SOC 2025 - Algorithmic Trading in Python\\Week 1}
+\author{Revanth Manepalli}
+\date{May 2025}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    commentstyle=\color{gray},
+    stringstyle=\color{green!50!black},
+    showstringspaces=false,
+    numberstyle=\tiny,
+    stepnumber=1,
+    breaklines=true,
+    frame=single,
+    captionpos=b
+}
+
+\begin{document}
+
+\maketitle
+
+\section*{Mean Reversion}
+\begin{itemize}
+    \item Mean reversion is a financial theory that suggests asset prices and historical returns eventually return to their long-term average (mean).
+    \item This concept assumes that extreme deviations from the mean are temporary and that prices will revert over time.
+    \item This strategy works well for stocks that are bounded within a certain range and are not highly volatile.
+    \item \textbf{Code Example:}
+    \begin{lstlisting}
+mean_price = prices[-20:].mean()
+threshold = 1.05
+if current_price > mean_price * threshold:
+    action = "sell_short"
+elif current_price < mean_price / threshold:
+    action = "buy"
+else:
+    action = "hold"
+    \end{lstlisting}
+    \item The threshold and the number '20' are parameters that we optimize during backtesting.
+    \item Threshold is self-explanatory, while the number '20' can mean a lot of different things like 20 seconds, 20 minutes, 20 hours or 20 days etc depending on the asset, market, and our algorithm.
+    \item Threshold is not a constant value. Mean reversion can be combined with Bollinger Bands, RSI, and Z-scores to have thresholds that change with market conditions.
+    \item It's not good to have a fixed threshold like in the above pseudo-code
+    \begin{itemize}
+        \item \textbf{Reason: } Markets are dynamic, and a fixed threshold may not adapt to changing market conditions.
+    \end{itemize}
+\end{itemize}
+
+\section*{Market Making}
+\begin{itemize}
+    \item Market making is a trading strategy where a trader continuously buys and sells a financial asset, quoting both bid and ask prices to provide liquidity to the market.
+    \item \textbf{Bid Price:} The price at which a trader is willing to buy an asset.
+    \item \textbf{Ask Price:} The price at which a trader is willing to sell an asset.
+    \item \textbf{Liquidity:} Liquidity refers to how easily an asset can be bought or sold in the market without affecting its price.
+    \item \textbf{Code Example:}
+    \begin{lstlisting}
+mid_price = (best_bid + best_ask) / 2
+spread = best_ask - best_bid
+if spread > min_desired_spread:
+    buy_price = mid_price - spread/2
+    sell_price = mid_price + spread/2
+    place_limit_order("buy", price=buy_price, amount=lot_size)
+    place_limit_order("sell", price=sell_price, amount=lot_size)
+    \end{lstlisting}
+    \item \textbf{Best Bid and Best Ask:} The best bid is the highest price a buyer is willing to pay, while the best ask is the lowest price a seller is willing to accept.
+    \item \textbf{Mid Price} is the average of the best bid and best ask prices and we take it to be the \textbf{fair price} of the asset.
+    \item Our buy order is placed at a price slightly below the mid price, and our sell order is placed at a price slightly above the mid price.
+\end{itemize}
+
+\section*{Stop Loss \& Take Profit}
+\begin{itemize}
+    \item These aren't trading strategies, they are the rules to manage exits.
+    \item \textbf{Stop Loss:} A stop loss is an order placed to sell a security when it reaches a certain price, limiting the potential loss on a trade.
+    \item \textbf{Take Profit:} A take profit order is placed to sell a security when it reaches a certain price, locking in profits on a trade. 
+    \item \textbf{Code Example:}
+    \begin{lstlisting}
+entry_price = purchase_price
+stop_loss = entry_price * 0.9   # 10% drop
+take_profit = entry_price * 1.2 # 20% rise
+
+if current_price <= stop_loss:
+    action = "sell_and_stop_loss"
+elif current_price >= take_profit:
+    action = "sell_and_take_profit"
+else:
+    action = "hold"
+    \end{lstlisting}
+    \item \textbf{why do we need a take-profit? Why can’t we remove it and collect as much profit as possible? }
+    \begin{enumerate}
+        \item \textbf{Markets are unpredictable:} Prices can fluctuate rapidly, and without a take-profit, you might miss out on gains if the price reverses.
+        \item \textbf{Greed kills profits: } Traders often hold onto positions too long, hoping for more profit, which can lead to losses if the market turns against them.
+        \item \textbf{Discipline over Emotion:} A take-profit order helps maintain discipline in trading by automating the exit at a predetermined profit level, reducing emotional decision-making.
+        \item \textbf{Optimizing Win rate and risk: Reward:} A take-profit order can help optimize the win rate and risk-reward ratio of a trading strategy by ensuring that profits are realized before the market can reverse.
+        \item \textbf{Captial Efficiency:} By locking in profits, traders can free up capital to reinvest in other opportunities, enhancing overall portfolio performance.
+    \end{enumerate}
+    \item Stop loss thresholds are determined by backtesting our algorithm
+    \item It can't be too tight, otherwise we will be stopped out too often, and it can't be too loose, otherwise we will lose a lot of money.
+    \item Stop-loss thresholds are determined by backtesting your algorithm. It cannot be too tight because then it’ll detect noise and exit your position, and it can’t be too high, or you’ll suffer bigger losses before exiting a bad position. We want to stay in a profitable position for as long as possible and we want to exit a bad position as quickly as possible without getting distracted by noise.
+\end{itemize}
+
+\section*{Bollinger Bands}
+\begin{itemize}
+    \item They are volatile-based technical indicator consisting of three lines plotted around a price chart.
+    \item The middle band is s 20-day simple moving average (SMA).
+    \item The upper and lower bands are bound by adding and subtracting two standard deviations from the middle band. 
+    \item According to guassian distribution, 95\% of the data points lie within two standard deviations from the mean - one of the reasons why we use additional indicators along with Bollinger Bands.
+    \item As Volatility increases, standard deviation increases, and the Bollinger Bands expand, and vice versa if Volatility is low.
+    \item These bands serve as thresholds for mean reversion.
+    \item \textbf{Misconception:} 
+    \begin{itemize}
+        \item Some traders believe:
+        \begin{itemize}
+            \item If the price touches the upper band, it must reverse and go down (so I should short), and if it touches the lower band, it must bounce back up (so I should go long).
+        \end{itemize}
+        \item But this is not always true. 
+        \item When the price touches the upper band, it simply means \textbf{Price is high relative to recent history}
+    \end{itemize}
+    \item During strong uptrends, the price can stay above the upper band for a long time, and during strong downtrends, the price can stay below the lower band for a long time.
+    \item \textbf{Code Example:}
+    \begin{lstlisting}
+def calculate_bollinger_bands(prices, period=20, std_multiplier=2.0):
+    # Assume you defined a SMA function somewhere
+    middle_band = SMA(prices, period)
+    
+    # Calculate standard deviation
+    std_deviation = np.std(prices[-period:], ddof=1)
+    
+    # Calculate upper and lower bands
+    upper_band = middle_band + (std_multiplier * std_deviation)
+    lower_band = middle_band - (std_multiplier * std_deviation)
+    
+    return upper_band, middle_band, lower_band
+    \end{lstlisting}
+    \item \textbf{We want you to look into why 'np.std()' has the argument 'ddof' and why we used it here.}
+    \begin{itemize}
+        \item 'ddof' stands for "Delta Degrees of Freedom" and is used to adjust the divisor during the calculation of the standard deviation.
+        \item In the context of sample standard deviation, 'ddof=1' is used to apply Bessel's correction, which corrects the bias in the estimation of the population standard deviation from a sample.
+        \item When calculating the standard deviation of a sample, we divide by \( n - ddof \) (where \( n \) is the number of data points).
+        \end{itemize}
+    \item \textbf{Also learn how to implement SMA in code yourself.}
+    \begin{lstlisting}
+def SMA(prices, period):
+    if len(prices) < period:
+        return None  # Not enough data to calculate SMA
+    return sum(prices[-period:]) / period
+    \end{lstlisting}
+\end{itemize}
+
+\section*{Relative Strength Index (RSI)}
+\begin{itemize}
+    \item RSI is a momentum oscillator that measures the speed and change of price movements.
+    \item It measures the magnitude of recent price changes(typically 14 days) to evaluate overbought or oversold conditions in a market.
+    \item It ranges from 0 to 100 and is typically used to identify overbought or oversold conditions in a market.
+    \begin{lstlisting}
+def calculate_rsi(prices, period=14):
+    gains = []
+    losses = []
+    
+    # Calculate **daily** price changes
+    for i in range(1, len(prices)):
+        change = prices[i] - prices[i-1]
+        if change > 0:
+            gains.append(change)
+            losses.append(0) # periods with price increase, we assume loss to be 0
+        else:
+            gains.append(0) # periods with price decrease, we assume profit to be 0
+            losses.append(abs(change))
+    
+    # Calculate average gain and loss
+    avg_gain = SMA(gains, period)
+    avg_loss = SMA(losses, period)
+    
+    # Calculate RS and RSI
+    if avg_loss == 0:
+        return 100
+    
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    
+    return rsi
+    \end{lstlisting}
+    \item RSI + Bollinger Bands form a goog trading strategy for mean reversion or even trend following and volatile stocks.
+    \item RSI gives us the momentum of the price, while Bollinger Bands give us the volatility of the price.
+    \item Although, during strong trends, RSI can stay in the overbought or oversold region for a long time, so we can't just rely on RSI alone.
+    \item \textbf{From the code you should be able to understand what the RSI is but it's still not clear how we can use RSI. Try to think of what it means when RSI is 100 and when RSI is 0, what does that say for the avg\_gain and avg\_loss ?}
+    \begin{itemize}
+        \item When RSI is 100, it indicates that the average gain over the specified period is significantly higher than the average loss, suggesting a strong upward momentum in the asset's price.
+        \item Conversely, when RSI is 0, it indicates that the average loss is significantly higher than the average gain, suggesting a strong downward momentum in the asset's price.
+        \item In both cases, the RSI values indicate extreme conditions in the market, either overbought (RSI near 100) or oversold (RSI near 0).
+        \item This can help traders identify potential reversal points or confirm the strength of a trend.
+    \end{itemize}
+    \item typically RSI values above 70 indicate that an asset is overbought, while values below 30 indicate that it is oversold.
+\end{itemize}
+
+\section*{Momentum}
+\begin{itemize}
+    \item Momentum is an idea that assets that have performed well in the past will continue to perform well in the future, and vice versa for poorly performing assets.
+    \item To measure momentum, we can compare the current price to the price a certain number of time unit (e.g., days, hours, minutes) ago.
+    \item If the current price is significantly higher than the price a certain number of time unit ago, you may go long, and if the current price is significantly lower than the price a certain number of time unit ago, you may go short.
+    \item Momentum traders often use technical indicators like the Moving Average Convergence Divergence (MACD) or the Rate of Change (ROC) to identify momentum.
+    \item Momentum traders don't try to predict the future price of an asset, they simply try to identify the current trend and ride it until it reverses.
+    \item \textbf{Code Example:}
+    \begin{lstlisting}
+lookback = 5
+momentum = prices[-1] - prices[-1-lookback]
+if momentum > 0:
+    action = "buy"   # price is higher than 'lookback' time units ago
+else:
+    action = "sell"  # price is lower, downtrend may continue
+    \end{lstlisting}
+    \item \textbf{*There is difference between selling and shorting. Find out what it is.}
+    \begin{itemize}
+        \item \textbf{Selling: }
+        \begin{itemize}
+            \item Selling means closing a position that you already own.
+            \item you're exiting a trade or investment by selling shares or assets that you previously bought.
+        \end{itemize}
+        \item \textbf{Shorting: }
+        \begin{itemize}
+            \item Shorting means you're betting that the price will fall. You borrow shares from a broker, sell them immediately, and later buy them back at a lower price (hopefully), returning them to the broker.
+        \end{itemize}
+        \begin{table}[h!]
+        \centering
+        \begin{tabular}{|p{5cm}|p{7cm}|}
+            \hline
+            \textbf{Selling} & \textbf{Shorting} \\
+            \hline
+            You own the asset. & You don’t own the asset (you borrow it). \\
+            \hline
+            Profit if price goes up, then you sell. & Profit if price goes down after you short. \\
+            \hline
+            This is called a "long" position. & Higher risk — potential for unlimited losses if price rises. \\
+            \hline
+        \end{tabular}
+        \caption{Difference Between Selling and Shorting}
+        \end{table}
+    \end{itemize}        
+\end{itemize}
+
+\section*{Breakout}
+\begin{itemize}
+    \item A Breakout occurs when the price of an asset moves outside a defined support or resistance level with increased volume.
+    \item It's a signal that the price may start tredning strongly in the direction of the breakout.
+    \begin{itemize}
+        \item \textbf{Resistence: }A ceiling price where the asset struggles to move higher.
+        \item \textbf{Support: }A floor price where the asset struggles to move lower.
+    \end{itemize}
+    \item A breakout means the price breaks above resistence or below support, suggesting a new trend is forming.
+    \item \textbf{Code Example:}
+    \begin{lstlisting}
+lookback = 20
+recent_high = max(prices[-lookback:])
+recent_low = min(prices[-lookback:])
+
+if current_price > recent_high:
+    action = "buy_breakout"
+elif current_price < recent_low:
+    action = "sell_breakout"
+else:
+    action = "hold"
+    \end{lstlisting}
+\end{itemize}
+
+\section*{Z-Score}
+\begin{itemize}
+    \item The Z-score is a statistical measure that tells you how far a data point is from the mean, in terms of standard deviations.
+    \item It helps traders understand wether a price unusually high or low compared to its historical average.
+    \item \textbf{Code Example:}
+    \begin{lstlisting}
+def calculate_zscore(prices, window=20):
+    moving_avg = SMA(prices, window)
+    moving_std = np.std(prices[-window:], ddof=1)
+    zscore = (prices - moving_avg) / moving_std
+    return zscore
+    \end{lstlisting}
+    \item A Z-score of 0 or close to 0 (like $<0.3$) means there are no significant price changes happening.
+    \newpage
+    \item \textbf{Rolling Z-Score: }
+    \begin{lstlisting}
+import pandas as pd
+import numpy as np
+
+def calculate_rolling_zscore(prices, window=20):
+    prices_series = pd.Series(prices)
+    moving_avg = prices_series.rolling(window=window).mean()
+    moving_std = prices_series.rolling(window=window).std(ddof=1)
+    zscore = (prices_series - moving_avg) / moving_std
+    return zscore
+    \end{lstlisting}
+\end{itemize}
+
+\end{document}
